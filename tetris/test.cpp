@@ -1,8 +1,12 @@
 #include <iostream>
 #include "game.h"
+using namespace std;
+
 
 int main() {
-    Tetromino red = createtetromino('R'):
-
+    cout << "fuck" << endl;
+    Tetromino red = createTetromino('R');
+    cout << red.colour << endl;
+    return 0;
     
 }
