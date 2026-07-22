@@ -1,5 +1,5 @@
 #include <TFT_eSPI.h>
-#include "tetris_utils.hpp"
+#include "utils.h"
 
 TFT_eSPI tft = TFT_eSPI();
 
