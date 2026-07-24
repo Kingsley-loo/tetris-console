@@ -1,7 +1,7 @@
 CXX := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic
 
-TARGET := test.exe game.exe
+TARGET := test.exe
 SOURCES := test.cpp game.cpp
 OBJECTS := $(SOURCES:.cpp=.o)
 

@@ -1,72 +1,143 @@
 #include "game.h"
 #include <string>
 #include <array>
+#include <cstdint>
+#include <TFT_eSPI.h>
 using namespace std;
 
-Tetromino::Tetromino(array <Cell, 4> shape, unsigned int x, unsigned int y, string newColour){
-    shape = shape;
-    x = x;
-    y = y;
-    colour = newColour;
+Tetromino::Tetromino(array<Cell, 4> newShape, unsigned int newX,
+            unsigned int newY, uint16_t newColour)
+    : shape(newShape),
+      x(newX),
+      y(newY),
+      colour(newColour) {
 }
-
 Tetromino::Tetromino() {
     shape = {{
           {0, 0}, {0, 0}, {0, 0}, {0, 0}
       }};
       x = 0;
       y = 0;
-      colour = "black";
+      colour = BLACK;
 }
 
 
 Tetromino createTetromino(char type) {
+
     switch(type) {
         case 'R': 
 
             return Tetromino(
                 array<Cell, 4>{{{0, 0}, {0, 1}, {1, 1}, {1, 2}}}, 
-                0, 0, "red"
+                0, 0, RED
             );
 
         case 'G':
 
             return Tetromino(
-                array<Cell, 4>{{{0, 1}, {0, 2}, {1, }, {1, 1}}}, 
-                0, 0, "green"
+                array<Cell, 4>{{{1, 0}, {1, 1}, {0, 1}, {0, 2}}}, 
+                0, 0, GREEN
             );
 
         case 'C': 
 
             return Tetromino(
                 array<Cell, 4>{{{0, 0}, {0, 1}, {0, 2}, {0, 3}}}, 
-                0, 0, "cyan"
-            );
-
-        case 'B':
-
-            return Tetromino(
-                array<Cell, 4>{{{0, 0}, {1, 0}, {1, 1}, {1, 2}}}, 
-                0, 0, "blue"
+                0, 0, CYAN
             );
 
         case 'O':
 
             return Tetromino(
+                array<Cell, 4>{{{0, 0}, {0, 1}, {0, 2}, {1, 2}}}, 
+                0, 0, ORANGE
+            );
+
+        case 'B':
+
+            return Tetromino(
                 array<Cell, 4>{{{1, 0}, {1, 1}, {1, 2}, {0, 2}}}, 
-                0, 0, "orange"
+                0, 0, BLUE
             );
 
         case 'P':
 
             return Tetromino(
                 array<Cell, 4>{{{1, 0}, {1, 1}, {1, 2}, {0, 1}}}, 
-                0, 0, "violet"
+                0, 0, VIOLET
+            );
+
+        case 'Y': 
+            return Tetromino(
+                array<Cell, 4>{{{0, 0}, {0, 1}, {1, 0}, {1, 1}}}, 
+                0, 0, YELLOW
             );
 
         default: 
             return Tetromino(); 
             
     }
+
+}
+
+void printBoard(Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
+    unsigned int count = 1;
+    cout << "bruh" << endl;
+        for (unsigned int i = 0; i < BOARD_WIDTH; i++) {
+            for (unsigned int j = 0; j < BOARD_HEIGHT; j++){
+                //cout << "i = " << i << " j = " << j;
+                cout <<  count <<  ": " << board[i][j].colour << " ";
+                count++;
+            }
+
+            cout << endl;
+        }
+
+    return;
+}
+
+void drawBlock(TFT_eSPI &tft, unsigned int x, unsigned int y, uint16_t colour) {
+    int xBlock = (x * 15) +6;
+    int yBlock = (y * 15) + 6;
+    tft.drawRect(xBlock, yBlock, 15, 15, colour);
+    return;
+
+}
+
+
+void LoadHomescreen(TFT_eSPI& tft) {
+
+    tft.setTextSize(2);
+    tft.setTextColor(TFT_WHITE);
+    tft.fillScreen(TFT_BLACK);
+    tft.drawRect(3, 3, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT, WHITE);
+    tft.drawString("NEXT:", 165, 5);
+    tft.drawRect(165, 30, NEXT_WINDOW_WIDTH, NEXT_WINDOW_HEIGHT, WHITE);
+    tft.drawString("SCORE:", 165, 105);
+    tft.drawString("123456", 165, 125);
+
+    return; 
+
+}
+
+//assuming the piece is within the boundaries of the board 
+void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
+                    Tetromino& piece, int x, int y) {
+
+    //for int i = 0, i < max_size(array Cell), i++
+    for (int i = 0; i < CELL_SIZE; i++) {
+        int xCor = piece.shape[i].x + x;
+        Serial.println(xCor);
+
+        int yCor = piece.shape[i].y + y;
+        Serial.println(yCor);
+        drawBlock(tft, xCor, yCor, piece.colour);
+        board[xCor][yCor].occupied = true;
+        board[xCor][yCor].colour = piece.colour;
+    //draw cube with colour from cell[i] = (x, y) to board[i][j]\
+
+    }
+    
+
 
 }
