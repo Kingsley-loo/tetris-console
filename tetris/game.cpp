@@ -56,14 +56,14 @@ Tetromino createTetromino(char type) {
         case 'B':
 
             return Tetromino(
-                array<Cell, 4>{{{1, 0}, {1, 1}, {1, 2}, {0, 2}}}, 
+                array<Cell, 4>{{{1, 0}, {0, 1}, {1, 1}, {2, 1}}}, 
                 0, 0, BLUE
             );
 
         case 'P':
 
             return Tetromino(
-                array<Cell, 4>{{{1, 0}, {1, 1}, {1, 2}, {0, 1}}}, 
+                array<Cell, 4>{{{1, 0}, {0, 1}, {1, 1}, {2, 1}}}, 
                 0, 0, VIOLET
             );
 
@@ -97,8 +97,8 @@ void printBoard(Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
 }
 
 void drawBlock(TFT_eSPI &tft, unsigned int x, unsigned int y, uint16_t colour) {
-    int xBlock = (x * 15) +6;
-    int yBlock = (y * 15) + 6;
+    int xBlock = (x * 15) + 5;
+    int yBlock = (y * 15) + 5;
     tft.drawRect(xBlock, yBlock, 15, 15, colour);
     return;
 
