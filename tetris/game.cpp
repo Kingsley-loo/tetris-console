@@ -5,6 +5,8 @@
 #include <TFT_eSPI.h>
 using namespace std;
 
+
+//constructor called in createTetromino 
 Tetromino::Tetromino(array<Cell, 4> newShape, unsigned int newX,
             unsigned int newY, uint16_t newColour)
     : shape(newShape),
@@ -12,6 +14,7 @@ Tetromino::Tetromino(array<Cell, 4> newShape, unsigned int newX,
       y(newY),
       colour(newColour) {
 }
+//empty tetromino 
 Tetromino::Tetromino() {
     shape = {{
           {0, 0}, {0, 0}, {0, 0}, {0, 0}
@@ -21,7 +24,7 @@ Tetromino::Tetromino() {
       colour = BLACK;
 }
 
-
+//creates tetrominos based on the type. 
 Tetromino createTetromino(char type) {
 
     switch(type) {
@@ -56,7 +59,7 @@ Tetromino createTetromino(char type) {
         case 'B':
 
             return Tetromino(
-                array<Cell, 4>{{{1, 0}, {0, 1}, {1, 1}, {2, 1}}}, 
+                array<Cell, 4>{{{1, 0}, {1, 1}, {1, 2}, {0, 2}}}, 
                 0, 0, BLUE
             );
 
@@ -80,6 +83,7 @@ Tetromino createTetromino(char type) {
 
 }
 
+//prints out each block on the game board for debugging, shows if occupied and what colour 
 void printBoard(Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
     unsigned int count = 1;
     cout << "bruh" << endl;
@@ -96,15 +100,23 @@ void printBoard(Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
     return;
 }
 
+//draws blocks. 
 void drawBlock(TFT_eSPI &tft, unsigned int x, unsigned int y, uint16_t colour) {
     int xBlock = (x * 15) + 5;
     int yBlock = (y * 15) + 5;
-    tft.drawRect(xBlock, yBlock, 15, 15, colour);
+    
+    if (colour == BLACK) {
+        tft.drawRect(xBlock, yBlock, 15, 15, BLACK);
+    } else {
+        tft.drawRect(xBlock, yBlock, 15, 15, WHITE);
+    }
+  
+    tft.fillRect(xBlock +1, yBlock + 1, 13, 13, colour);
     return;
 
 }
 
-
+//sets up the main home screen of the game, board layout, score, next tetrominos 
 void LoadHomescreen(TFT_eSPI& tft) {
 
     tft.setTextSize(2);
@@ -138,6 +150,38 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
 
     }
     
+}
+
+//used for redrawing the Tetromino 
+void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
+                    Tetromino& piece, int x, int y, int xPrev, int yPrev) {
+
+    //for int i = 0, i < max_size(array Cell), i++
+    for (int i = 0; i < CELL_SIZE; i++) {
+
+        int xCor = piece.shape[i].x + x;
+        Serial.println(xCor);
+
+        int yCor = piece.shape[i].y + y;
+
+        int xCorPrev = piece.shape[i].x + xPrev;
+        int yCorPrev = piece.shape[i].y + yPrev;
+
+        Serial.println(yCor);
+
+        drawBlock(tft, xCorPrev, yCorPrev, BLACK);
+        drawBlock(tft, xCor, yCor, piece.colour);
+
+        board[xCorPrev][yCorPrev].occupied = false;
+        board[xCorPrev][yCorPrev].colour = BLACK;
+
+        board[xCor][yCor].occupied = true;
+        board[xCor][yCor].colour = piece.colour;
 
 
+
+    //draw cube with colour from cell[i] = (x, y) to board[i][j]\
+
+    }
+    
 }

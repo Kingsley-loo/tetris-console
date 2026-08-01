@@ -70,5 +70,6 @@ void LoadHomescreen(TFT_eSPI& tft);
 void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
                     Tetromino& piece, int x, int y);
 
-
+void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
+                    Tetromino& piece, int x, int y, int xPrev, int yPrev);
 #endif

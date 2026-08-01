@@ -6,8 +6,15 @@ const int ACTION = 32;
 const int MENU = 33;
 const int LEFT = 25; 
 const int RIGHT = 26;
-const int UP = 27;
+const int HOLD = 27;
 const int DOWN = 14;
+
+int xCursor = 4;
+int yCursor = 0;
+
+Block board[BOARD_WIDTH][BOARD_HEIGHT];
+Tetromino test = createTetromino('C');
+
 
 void setup() {
     Serial.begin(115200); 
@@ -18,73 +25,47 @@ void setup() {
     pinMode(MENU, INPUT_PULLUP);
     pinMode(LEFT, INPUT_PULLUP);
     pinMode(RIGHT, INPUT_PULLUP);
-    pinMode(UP, INPUT_PULLUP);
+    pinMode(HOLD, INPUT_PULLUP);
     pinMode(DOWN, INPUT_PULLUP);
+    LoadHomescreen(tft);
+    drawTetromino(tft, board, test, 4, 0);
+
 
 }
 
+bool moveCursor = HIGH; 
+int counter = 0;
 void loop() {
+    drawTetromino(tft, board, test, xCursor, yCursor);
 
-    /*
-    LoadHomescreen(tft);
+    //moveCursor prevents the block from moving multiple times when the button 
+    //is pressed only once 
 
-    Block board[BOARD_WIDTH][BOARD_HEIGHT];
-    Tetromino test = createTetromino('O');
-    Tetromino bruh = createTetromino('G');
-    Tetromino red = createTetromino('R');
-    Tetromino blue = createTetromino('B'); 
-    Tetromino purple = createTetromino('P');
-    Tetromino cyan = createTetromino('C'); 
-    Tetromino yellow = createTetromino('Y');
-    drawTetromino(tft, board, test, 0, 1);
-    drawTetromino(tft, board, bruh, 3, 5);
-    drawTetromino(tft, board, red, 8, 8);
-    drawTetromino(tft, board, blue, 0, 17); 
-    drawTetromino(tft, board, purple, 5, 12);
-    drawTetromino(tft, board, yellow, 2, 18);
-    drawTetromino(tft, board, test, 4, 17);
-    drawTetromino(tft, board, yellow, 6, 18);
-    drawTetromino(tft, board, yellow, 8, 18);
-    */
+    //left movement 
+    if (moveCursor == HIGH) {
+        if (digitalRead(LEFT) == LOW) {
+            //draw Tetromino in new location, drawing black empty blocks in the previous location 
+            drawTetromino(tft, board, test, xCursor - 1, yCursor, xCursor, yCursor);
+            //sets new location of cursor 
+            xCursor = xCursor - 1;
+            //stops movement
+            moveCursor = digitalRead(LEFT); 
+        }
 
-    bool buttonPressed = false;
+        else if (digitalRead(RIGHT) == LOW) {
+            drawTetromino(tft, board, test, xCursor + 1, yCursor, xCursor, yCursor);
+            xCursor = xCursor + 1;
+            moveCursor = digitalRead(RIGHT); 
+        }
+        
 
-    if (digitalRead(ACTION) == LOW) {
-        Serial.print("ACTION ");
-        buttonPressed = true;
+    } else {
+        if ((digitalRead(LEFT) == HIGH) && (digitalRead(RIGHT) == HIGH)) {
+            moveCursor = HIGH;
+        }
+
     }
 
-    if (digitalRead(MENU) == LOW) {
-        Serial.print("MENU ");
-        buttonPressed = true;
-    }
-
-    if (digitalRead(LEFT) == LOW) {
-        Serial.print("LEFT ");
-        buttonPressed = true;
-    }
-
-    if (digitalRead(RIGHT) == LOW) {
-        Serial.print("RIGHT ");
-        buttonPressed = true;
-    }
-
-    if (digitalRead(UP) == LOW) {
-        Serial.print("UP ");
-        buttonPressed = true;
-    }
-
-    if (digitalRead(DOWN) == LOW) {
-        Serial.print("DOWN ");
-        buttonPressed = true;
-    }
-
-    if (buttonPressed) {
-        Serial.print("\n");
-    }
-
-    delay(100);
-    
 
 }
 
