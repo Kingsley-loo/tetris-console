@@ -44,18 +44,35 @@ void loop() {
     //left movement 
     if (moveCursor == HIGH) {
         if (digitalRead(LEFT) == LOW) {
-            //draw Tetromino in new location, drawing black empty blocks in the previous location 
-            drawTetromino(tft, board, test, xCursor - 1, yCursor, xCursor, yCursor);
-            //sets new location of cursor 
-            xCursor = xCursor - 1;
-            //stops movement
             moveCursor = digitalRead(LEFT); 
+            if (collisionCheck(test, xCursor -1, yCursor) == LOW) {
+                //draw Tetromino in new location, drawing black empty blocks in the previous location 
+                drawTetromino(tft, board, test, xCursor - 1, yCursor, xCursor, yCursor);
+                //sets new location of cursor 
+                xCursor = xCursor - 1;
+                //stops movement
+
+                printBoard(board);
+            } else {
+                Serial.println("tetromino has hit a wall"); 
+            }
         }
 
+        
+
         else if (digitalRead(RIGHT) == LOW) {
-            drawTetromino(tft, board, test, xCursor + 1, yCursor, xCursor, yCursor);
-            xCursor = xCursor + 1;
-            moveCursor = digitalRead(RIGHT); 
+            moveCursor = digitalRead(RIGHT);
+            if (collisionCheck(test, xCursor +1, yCursor) == LOW) {
+                drawTetromino(tft, board, test, xCursor + 1, yCursor, xCursor, yCursor);
+                xCursor = xCursor + 1;
+                printBoard(board);
+            } else {
+                Serial.println("tetromino has hit a wall"); 
+            }
+
+
+
+
         }
         
 

@@ -7,90 +7,166 @@ using namespace std;
 
 
 //constructor called in createTetromino 
-Tetromino::Tetromino(array<Cell, 4> newShape, unsigned int newX,
-            unsigned int newY, uint16_t newColour)
-    : shape(newShape),
-      x(newX),
-      y(newY),
-      colour(newColour) {
-}
-//empty tetromino 
-Tetromino::Tetromino() {
-    shape = {{
-          {0, 0}, {0, 0}, {0, 0}, {0, 0}
-      }};
-      x = 0;
-      y = 0;
-      colour = BLACK;
+Tetromino::Tetromino(Cell newShape[ROTATION][COORDINATE], unsigned int newX,
+            unsigned int newY, uint16_t newColour, int newOrientation) {
+
+    for (int i = 0; i < ROTATION; i++ ) {
+        for (int j = 0; j < COORDINATE; j++) {
+            shape[i][j] =  newShape[i][j];
+        }
+    }
+
+    x = newX; 
+    y = newY; 
+    colour = newColour;
+    orientation = newOrientation;
+
 }
 
 //creates tetrominos based on the type. 
 Tetromino createTetromino(char type) {
 
     switch(type) {
-        case 'R': 
+        case 'R': {
+            Cell shape[ROTATION][COORDINATE] = {
 
-            return Tetromino(
-                array<Cell, 4>{{{0, 0}, {0, 1}, {1, 1}, {1, 2}}}, 
-                0, 0, RED
-            );
+                {{0, 1}, {1, 1}, {1, 0}, {2, 0}}, 
+                {{0, 0}, {0, 1}, {1, 1}, {1, 2}},
+                {{0, 1}, {1, 1}, {1, 0}, {2, 0}}, 
+                {{0, 0}, {0, 1}, {1, 1}, {1, 2}}
 
-        case 'G':
+            };
+            return Tetromino(shape, 0, 0, RED, 0);
+        }
+        case 'G': {
 
-            return Tetromino(
-                array<Cell, 4>{{{1, 0}, {1, 1}, {0, 1}, {0, 2}}}, 
-                0, 0, GREEN
-            );
+            Cell shape[ROTATION][COORDINATE] = {
 
-        case 'C': 
+                {{0, 0}, {1, 0}, {1, 1}, {2, 1}}, 
+                {{0, 1}, {1, 1}, {1, 0}, {0, 2}}, 
+                {{0, 0}, {1, 0}, {1, 1}, {2, 1}}, 
+                {{0, 1}, {1, 1}, {1, 0}, {0, 2}}
 
-            return Tetromino(
-                array<Cell, 4>{{{0, 0}, {0, 1}, {0, 2}, {0, 3}}}, 
-                0, 0, CYAN
-            );
+            };
 
-        case 'O':
+            return Tetromino(shape, 0, 0, GREEN, 0);
+        }
+        case 'C': {
 
-            return Tetromino(
-                array<Cell, 4>{{{0, 0}, {0, 1}, {0, 2}, {1, 2}}}, 
-                0, 0, ORANGE
-            );
+            Cell shape[ROTATION][COORDINATE] = {
 
-        case 'B':
+                {{0, 0}, {1, 0}, {2, 0}, {3, 0}},
+                {{0, 0}, {0, 1}, {0, 2}, {0, 3}},
+                {{0, 0}, {1, 0}, {2, 0}, {3, 0}},
+                {{0, 0}, {0, 1}, {0, 2}, {0, 3}},
 
-            return Tetromino(
-                array<Cell, 4>{{{1, 0}, {1, 1}, {1, 2}, {0, 2}}}, 
-                0, 0, BLUE
-            );
+            };
+            return Tetromino(shape, 0, 0, CYAN, 0);
 
-        case 'P':
+        }
+        case 'O': {
 
-            return Tetromino(
-                array<Cell, 4>{{{1, 0}, {0, 1}, {1, 1}, {2, 1}}}, 
-                0, 0, VIOLET
-            );
+            Cell shape[ROTATION][COORDINATE] = {
 
-        case 'Y': 
-            return Tetromino(
-                array<Cell, 4>{{{0, 0}, {0, 1}, {1, 0}, {1, 1}}}, 
-                0, 0, YELLOW
-            );
+                {{0, 0}, {0, 1}, {0, 2}, {1, 2}},
+                {{0, 0}, {1, 0}, {2, 0}, {0, 1}},
+                {{0, 0}, {1, 0}, {1, 1}, {1, 2}}, 
+                {{0, 0}, {0, 1}, {1, 1}, {2, 1}}
 
-        default: 
-            return Tetromino(); 
-            
+            };
+            return Tetromino(shape, 0, 0, ORANGE, 0);
+        
+        }
+
+        case 'B': {
+
+            Cell shape[ROTATION][COORDINATE] = {
+
+                {{1, 0}, {1, 1}, {0, 2}, {1, 2}},
+                {{0, 0} , {0, 1}, {1, 1}, {2, 1}},
+                {{0, 0}, {1, 0}, {0, 1}, {0, 2}},
+                {{0, 0}, {1, 0}, {2, 0}, {2, 1}}
+            };
+
+            return Tetromino(shape, 0, 0, BLUE, 0);
+        }
+
+        case 'P': {
+
+            Cell shape[ROTATION][COORDINATE] = {
+
+                {{1, 0}, {0, 1}, {1, 1}, {2, 1}}, 
+                {{0, 0}, {0, 1}, {1, 1}, {0 ,2}},
+                {{0, 0}, {1, 0}, {2, 0}, {1, 1}},
+                {{1, 0}, {0, 1}, {1, 1}, {1, 2}}
+
+            };
+
+        
+
+            return Tetromino(shape, 0, 0, VIOLET, 0);
+        }
+        case 'Y': {
+
+        Cell shape[ROTATION][COORDINATE] = {
+
+            {{0, 0}, {0, 1}, {1, 0}, {1, 1}},
+            {{0, 0}, {0, 1}, {1, 0}, {1, 1}},
+            {{0, 0}, {0, 1}, {1, 0}, {1, 1}},
+            {{0, 0}, {0, 1}, {1, 0}, {1, 1}}
+
+        };
+
+            return Tetromino(shape, 0, 0, YELLOW, 0);
+        
+        }
     }
 
+}
+
+//helper function to output the string name of a uin16_t colour 
+string colourName(uint16_t colour) {
+    switch (colour) {
+        case 0x0000:
+            return "BLACK";
+
+        case 0xFFFF:
+            return "WHITE";
+
+        case 0xF800:
+            return "RED";
+
+        case 0x07E0:
+            return "GREEN";
+
+        case 0x001F:
+            return "BLUE";
+
+        case 0xFFE0:
+            return "YELLOW";
+
+        case 0x07FF:
+            return "CYAN";
+
+        case 0xFDA0:
+            return "ORANGE";
+
+        case 0x780F:
+            return "PURPLE";
+
+        default:
+            return "UNKNOWN";
+    }
 }
 
 //prints out each block on the game board for debugging, shows if occupied and what colour 
 void printBoard(Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
     unsigned int count = 1;
     cout << "bruh" << endl;
-        for (unsigned int i = 0; i < BOARD_WIDTH; i++) {
-            for (unsigned int j = 0; j < BOARD_HEIGHT; j++){
+        for (unsigned int i = 0; i < BOARD_HEIGHT; i++) {
+            for (unsigned int j = 0; j < BOARD_WIDTH; j++){
                 //cout << "i = " << i << " j = " << j;
-                cout <<  count <<  ": " << board[i][j].colour << " ";
+                cout <<  count <<  ": " << colourName(board[j][i].colour) << " ";
                 count++;
             }
 
@@ -116,7 +192,7 @@ void drawBlock(TFT_eSPI &tft, unsigned int x, unsigned int y, uint16_t colour) {
 
 }
 
-//sets up the main home screen of the game, board layout, score, next tetrominos 
+//sets up the main home screen of the game, board layout, score, next tetrominos, held tetromino 
 void LoadHomescreen(TFT_eSPI& tft) {
 
     tft.setTextSize(2);
@@ -124,9 +200,12 @@ void LoadHomescreen(TFT_eSPI& tft) {
     tft.fillScreen(TFT_BLACK);
     tft.drawRect(3, 3, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT, WHITE);
     tft.drawString("NEXT:", 165, 5);
-    tft.drawRect(165, 30, NEXT_WINDOW_WIDTH, NEXT_WINDOW_HEIGHT, WHITE);
-    tft.drawString("SCORE:", 165, 105);
-    tft.drawString("123456", 165, 125);
+    tft.drawRect(165, 25, NEXT_WINDOW_WIDTH, NEXT_WINDOW_HEIGHT, WHITE);
+
+    tft.drawString("HOLD:", 165, 105);
+    tft.drawRect(165, 125, NEXT_WINDOW_WIDTH, NEXT_WINDOW_HEIGHT, WHITE);
+    tft.drawString("SCORE:", 165, 274);
+    tft.drawString("123456", 165, 294);
 
     return; 
 
@@ -138,11 +217,11 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
 
     //for int i = 0, i < max_size(array Cell), i++
     for (int i = 0; i < CELL_SIZE; i++) {
-        int xCor = piece.shape[i].x + x;
-        Serial.println(xCor);
+        int xCor = piece.shape[0][i].x + x;
+        //Serial.println(xCor);
 
-        int yCor = piece.shape[i].y + y;
-        Serial.println(yCor);
+        int yCor = piece.shape[0][i].y + y;
+        //Serial.println(yCor);
         drawBlock(tft, xCor, yCor, piece.colour);
         board[xCor][yCor].occupied = true;
         board[xCor][yCor].colour = piece.colour;
@@ -156,32 +235,51 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
 void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
                     Tetromino& piece, int x, int y, int xPrev, int yPrev) {
 
-    //for int i = 0, i < max_size(array Cell), i++
+    //loop that removes tetromino from old location 
     for (int i = 0; i < CELL_SIZE; i++) {
+        int xCorPrev = piece.shape[0][i].x + xPrev;
+        int yCorPrev = piece.shape[0][i].y + yPrev;
 
-        int xCor = piece.shape[i].x + x;
-        Serial.println(xCor);
-
-        int yCor = piece.shape[i].y + y;
-
-        int xCorPrev = piece.shape[i].x + xPrev;
-        int yCorPrev = piece.shape[i].y + yPrev;
-
-        Serial.println(yCor);
-
+        //Serial.println(yCor);
+        
         drawBlock(tft, xCorPrev, yCorPrev, BLACK);
-        drawBlock(tft, xCor, yCor, piece.colour);
 
+        //colours the previous block location to black 
         board[xCorPrev][yCorPrev].occupied = false;
         board[xCorPrev][yCorPrev].colour = BLACK;
 
+
+
+    //draw cube with colour from cell[i] = (x, y) to board[i][j]
+
+    }
+    // loop that draws tetromino in new location 
+    for (int i = 0; i < CELL_SIZE; i++) {
+        int xCor = piece.shape[0][i].x + x;
+        //Serial.println(xCor);
+        int yCor = piece.shape[0][i].y + y;
+        drawBlock(tft, xCor, yCor, piece.colour);
         board[xCor][yCor].occupied = true;
         board[xCor][yCor].colour = piece.colour;
 
-
-
-    //draw cube with colour from cell[i] = (x, y) to board[i][j]\
-
     }
     
+}
+
+//x and y are the values that the cursor wants to move to 
+bool collisionCheck(Tetromino& piece, int  x, int y) {
+    for (int i = 0; i < CELL_SIZE; i++) {
+        //get tetromino orientation and shape coordinates
+        int ori = piece.orientation;
+        Cell newBlock = piece.shape[ori][i];
+        int newX = newBlock.x + x;
+        int newY = newBlock.y + y;
+        if ((newX <= 0) || (newX >= 9)) {
+            return true;
+        }
+        //use x and y and tetromino coordinates to calculate position on board 
+
+
+    }
+    return false; 
 }

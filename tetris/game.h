@@ -31,7 +31,8 @@ const unsigned int NEXT_WINDOW_HEIGHT = 65;
 
 const unsigned int CELL_SIZE = 4;
 
-
+const unsigned int ROTATION = 4;
+const unsigned int COORDINATE = 4;
 
 struct Block {
 
@@ -49,14 +50,15 @@ struct Cell {
 
 class Tetromino {
     public: 
-
-        array <Cell, 4> shape; 
+        
+        Cell shape[ROTATION][COORDINATE]; 
         unsigned int x; 
         unsigned int y; 
         uint16_t colour; 
+        int orientation; 
 
-        Tetromino(array <Cell, 4> shape, unsigned int x, unsigned int y, uint16_t newColour);
-        Tetromino();
+        Tetromino(Cell newShape[ROTATION][COORDINATE], unsigned int newX, unsigned int newY, uint16_t newColour, int newOrientation);
+
 };
 
 void printBoard(Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]);
@@ -72,4 +74,6 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
 
 void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
                     Tetromino& piece, int x, int y, int xPrev, int yPrev);
+
+bool collisionCheck(Tetromino& piece, int  x, int y);
 #endif
