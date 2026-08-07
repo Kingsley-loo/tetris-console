@@ -75,5 +75,11 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
 void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
                     Tetromino& piece, int x, int y, int xPrev, int yPrev);
 
-bool collisionCheck(Tetromino& piece, int  x, int y);
+bool wallCollision(Tetromino& piece, int  x, int y);
+
+void deleteTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
+                    Tetromino& piece, int x, int y);
+
+void rotateTetromino(TFT_eSPI& tft, Tetromino& piece, 
+                    Block (&board)[BOARD_WIDTH][BOARD_HEIGHT], int& xCursor, int& yCursor);
 #endif

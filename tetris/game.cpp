@@ -151,7 +151,7 @@ string colourName(uint16_t colour) {
         case 0xFDA0:
             return "ORANGE";
 
-        case 0x780F:
+        case 0x915C:
             return "PURPLE";
 
         default:
@@ -217,10 +217,10 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
 
     //for int i = 0, i < max_size(array Cell), i++
     for (int i = 0; i < CELL_SIZE; i++) {
-        int xCor = piece.shape[0][i].x + x;
+        int xCor = piece.shape[piece.orientation][i].x + x;
         //Serial.println(xCor);
 
-        int yCor = piece.shape[0][i].y + y;
+        int yCor = piece.shape[piece.orientation][i].y + y;
         //Serial.println(yCor);
         drawBlock(tft, xCor, yCor, piece.colour);
         board[xCor][yCor].occupied = true;
@@ -231,14 +231,34 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
     
 }
 
+void deleteTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
+                    Tetromino& piece, int x, int y) {
+
+    for (int i = 0; i < CELL_SIZE; i++) {
+        int xCor = piece.shape[piece.orientation][i].x + x;
+        //Serial.println(xCor);
+
+        int yCor = piece.shape[piece.orientation][i].y + y;
+        //Serial.println(yCor);
+        drawBlock(tft, xCor, yCor, BLACK);
+        board[xCor][yCor].occupied = false;
+        board[xCor][yCor].colour = BLACK;
+
+
+    }
+
+    return;
+
+}
+
 //used for redrawing the Tetromino 
 void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
                     Tetromino& piece, int x, int y, int xPrev, int yPrev) {
-
+    int ori = piece.orientation; 
     //loop that removes tetromino from old location 
     for (int i = 0; i < CELL_SIZE; i++) {
-        int xCorPrev = piece.shape[0][i].x + xPrev;
-        int yCorPrev = piece.shape[0][i].y + yPrev;
+        int xCorPrev = piece.shape[ori][i].x + xPrev;
+        int yCorPrev = piece.shape[ori][i].y + yPrev;
 
         //Serial.println(yCor);
         
@@ -255,9 +275,9 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
     }
     // loop that draws tetromino in new location 
     for (int i = 0; i < CELL_SIZE; i++) {
-        int xCor = piece.shape[0][i].x + x;
+        int xCor = piece.shape[ori][i].x + x;
         //Serial.println(xCor);
-        int yCor = piece.shape[0][i].y + y;
+        int yCor = piece.shape[ori][i].y + y;
         drawBlock(tft, xCor, yCor, piece.colour);
         board[xCor][yCor].occupied = true;
         board[xCor][yCor].colour = piece.colour;
@@ -267,14 +287,14 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
 }
 
 //x and y are the values that the cursor wants to move to 
-bool collisionCheck(Tetromino& piece, int  x, int y) {
+bool wallCollision(Tetromino& piece, int  x, int y) {
     for (int i = 0; i < CELL_SIZE; i++) {
         //get tetromino orientation and shape coordinates
         int ori = piece.orientation;
         Cell newBlock = piece.shape[ori][i];
         int newX = newBlock.x + x;
         int newY = newBlock.y + y;
-        if ((newX <= 0) || (newX >= 9)) {
+        if ((newX < 0) || (newX > 9)) {
             return true;
         }
         //use x and y and tetromino coordinates to calculate position on board 
@@ -282,4 +302,57 @@ bool collisionCheck(Tetromino& piece, int  x, int y) {
 
     }
     return false; 
+}
+
+//will modify tetromino and cursor values if rotation is possible
+
+void rotateTetromino(TFT_eSPI& tft, Tetromino& piece, 
+            Block (&board)[BOARD_WIDTH][BOARD_HEIGHT], int& xCursor, int& yCursor) {
+    bool leftCollision = false; 
+    bool rightCollision = false;
+    //check the next four left and four right blocks
+    int move = 0; 
+    //create sample tetromino to test if rotation possivle 
+    Tetromino sample = piece; 
+
+    //changes orientation of tetromino (rotates clockwise)
+    if (sample.orientation == 3) {
+        sample.orientation = 0; 
+    } else {
+        sample.orientation++; 
+    }
+
+    //checks how many times the cursor needs to move left or right
+    for (int i = 0; i < CELL_SIZE; i++) {
+        if (sample.shape[sample.orientation][i].x + xCursor < 0) {
+            leftCollision = true; 
+            move++; 
+        }
+        if (sample.shape[sample.orientation][i].x + xCursor > 9) {
+            rightCollision = true; 
+            move++;
+        }
+    }
+
+    //removes tetromino from board and display 
+    deleteTetromino(tft, board, piece, xCursor, yCursor);
+
+    //modifies cursor value to new spot 
+    if (leftCollision == true) {
+        xCursor = xCursor + move;
+    } else if (rightCollision == true) {
+        xCursor = xCursor - move; 
+    }
+
+    //changes tetromino piece's orientation
+    if (piece.orientation == 3) {
+        piece.orientation = 0; 
+    } else {
+        piece.orientation++; 
+    }
+    Serial.println(piece.orientation);
+    //draws new tetromino
+    drawTetromino(tft, board, piece, xCursor, yCursor);
+    Serial.println("tetromino rotaion successful");
+
 }
