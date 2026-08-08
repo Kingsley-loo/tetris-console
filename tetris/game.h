@@ -3,7 +3,7 @@
 
 
 #include <string>
-#include <array>
+#include <iomanip>
 #include <iostream>
 #include <cstdint>
 #include <TFT_eSPI.h>
@@ -51,10 +51,15 @@ struct Cell {
 class Tetromino {
     public: 
         
+        //2D array of the Tetromino's different orientations 
+        //rotates clockwise 
         Cell shape[ROTATION][COORDINATE]; 
+        //where the starting coordinates should be. centers the Tetromino 
         unsigned int x; 
         unsigned int y; 
+        //colour of Tetromino using the TFT library's colours 
         uint16_t colour; 
+        //which rotation the Tetromino is currently at. 
         int orientation; 
 
         Tetromino(Cell newShape[ROTATION][COORDINATE], unsigned int newX, unsigned int newY, uint16_t newColour, int newOrientation);
@@ -82,4 +87,11 @@ void deleteTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
 
 void rotateTetromino(TFT_eSPI& tft, Tetromino& piece, 
                     Block (&board)[BOARD_WIDTH][BOARD_HEIGHT], int& xCursor, int& yCursor);
+
+void lockTetromino (TFT_eSPI& tft, Tetromino& piece, 
+                    Block (&board)[BOARD_WIDTH][BOARD_HEIGHT], int x, int y);
+
+bool blockCollision(Tetromino& piece, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT], int x, int y);
+
+void drawGhostBlock(TFT_eSPI &tft, unsigned int x, unsigned int y, uint16_t colour);
 #endif
