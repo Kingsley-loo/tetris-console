@@ -3,7 +3,10 @@
 #include <cstdint>
 #include <TFT_eSPI.h>
 #include <iomanip>
+#include <random>
 using namespace std;
+
+char tetrominoList[7] = {'R', 'G', 'C', 'O', 'B', 'P', 'Y'};
 
 
 //constructor called in createTetromino 
@@ -288,7 +291,8 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
 
     //making ghost Tetromino 
     int counter = 0; 
-    while (!(wallCollision(piece, x, y + counter + 1))) {
+    while (!(wallCollision(piece, x, y + counter + 1)) 
+                    && !(blockCollision(piece, board, x, y + counter + 1))) {
         counter++; 
     } 
 
@@ -321,7 +325,8 @@ void deleteTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
 
     }
     int counter = 0; 
-    while (!(wallCollision(piece, x, y + counter + 1))) {
+    while (!(wallCollision(piece, x, y + counter + 1))
+                    && !(blockCollision(piece, board, x, y + counter + 1))) {
         counter++; 
     } 
 
@@ -345,7 +350,7 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
                     Tetromino& piece, int x, int y, int xPrev, int yPrev) {
     int ori = piece.orientation; 
     //loop that removes tetromino from old location 
-    for (int i = 0; i < CELL_SIZE; i++) {
+    /*for (int i = 0; i < CELL_SIZE; i++) {
         int xCorPrev = piece.shape[ori][i].x + xPrev;
         int yCorPrev = piece.shape[ori][i].y + yPrev;
 
@@ -354,14 +359,14 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
         drawBlock(tft, xCorPrev, yCorPrev, BLACK);
 
         //colours the previous block location to black 
-        board[xCorPrev][yCorPrev].occupied = false;
         board[xCorPrev][yCorPrev].colour = BLACK;
 
 
 
     //draw cube with colour from cell[i] = (x, y) to board[i][j]
 
-    }
+    }*/
+   deleteTetromino(tft, board, piece, xPrev, yPrev);
     // loop that draws tetromino in new location 
     for (int i = 0; i < CELL_SIZE; i++) {
         int xCor = piece.shape[ori][i].x + x;
@@ -373,11 +378,12 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
         
     }
     int counter = 0; 
-    while (!(wallCollision(piece, x, y + counter + 1))) {
+    while (!(wallCollision(piece, x, y + counter + 1)) 
+                    && !(blockCollision(piece, board, x, y + counter + 1))) {
         counter++; 
   
     } 
-
+    /*
     for (int i = 0; i < CELL_SIZE; i++) {
         int xCor = piece.shape[piece.orientation][i].x + xPrev;
         //Serial.println(xCor);
@@ -385,7 +391,7 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
         int yCor = piece.shape[piece.orientation][i].y + yPrev;
         //Serial.println(yCor);
         drawGhostBlock(tft, xCor, yCor + counter, BLACK);
-    }
+    }*/
     for (int i = 0; i < CELL_SIZE; i++) {
         int xCor = piece.shape[piece.orientation][i].x + x;
         //Serial.println(xCor);
@@ -406,7 +412,7 @@ bool wallCollision(Tetromino& piece, int  x, int y) {
         Cell newBlock = piece.shape[ori][i];
         int newX = newBlock.x + x;
         int newY = newBlock.y + y;
-        if ((newX < 0) || (newX > 9) || (newY < 0) || (newY > 19)) {
+        if ((newX < 0) || (newX > BOARD_WIDTH -1 ) || (newY < 0) || (newY > BOARD_HEIGHT - 1)) {
             return true;
         }
         //use x and y and tetromino coordinates to calculate position on board 
@@ -473,22 +479,15 @@ void rotateTetromino(TFT_eSPI& tft, Tetromino& piece,
 //without collisions 
 void lockTetromino (TFT_eSPI& tft, Tetromino& piece, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT], int xCursor, int yCursor) {
     int counter = 0; 
-    while (!(wallCollision(piece, xCursor, yCursor + counter + 1))) {
+    while (!(wallCollision(piece, xCursor, yCursor + counter + 1)) && 
+                        !(blockCollision(piece, board, xCursor, yCursor + counter + 1))) {
         counter++; 
     } 
 
     for (int i = 0; i < CELL_SIZE; i++) {
-        int xCor = piece.shape[piece.orientation][i].x + xCursor;
-        //Serial.println(xCor);
-
-        int yCor = piece.shape[piece.orientation][i].y + yCursor;
-        //Serial.println(yCor);
-        drawGhostBlock(tft, xCor, yCor + counter, BLACK);
-    }
-    for (int i = 0; i < CELL_SIZE; i++) {
         //get coordinates of the block 
         int xLock = piece.shape[piece.orientation][i].x + xCursor;
-        int yLock = piece.shape[piece.orientation][i].y + yCursor;
+        int yLock = piece.shape[piece.orientation][i].y + yCursor + counter;
 
         //make block occupied and change it's colour 
         board[xLock][yLock].occupied = true; 
@@ -496,6 +495,7 @@ void lockTetromino (TFT_eSPI& tft, Tetromino& piece, Block (&board)[BOARD_WIDTH]
         //draw block on display 
         drawBlock(tft, xLock, yLock, board[xLock][yLock].colour); 
     }
+    deleteTetromino(tft, board, piece, xCursor, yCursor);
 }
 
 //checks if the blocks for the future location of a tetromino is occupied. 
@@ -506,22 +506,32 @@ bool blockCollision(Tetromino& piece, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
         //get coordinates for where the tetromino block wants to move 
         int xMove = piece.shape[piece.orientation][i].x + xCursor;
         int yMove = piece.shape[piece.orientation][i].y + yCursor; 
-        Serial.print("block wants to move to: (");
-        Serial.print(xCursor); 
-        Serial.print(", ");
-        Serial.print(yCursor); 
-        Serial.print(")\n");
+        //Serial.print("block wants to move to: (");
+        //Serial.print(xCursor); 
+        //Serial.print(", ");
+       // Serial.print(yCursor); 
+       // Serial.print(")\n");
 
 
 
         if (board[xMove][yMove].occupied == true) {
-            Serial.print("block collision detected");
+            //Serial.print("block collision detected");
             return true; 
 
         }
 
-
-
     }
     return false;
+}
+
+Tetromino spawnTetromino() {
+    random_device rd; 
+
+    mt19937 gen(rd()); 
+
+    uniform_int_distribution<int> dist(0, 6); 
+
+    int randomNum = dist(gen); 
+
+    return (createTetromino(tetrominoList[randomNum]));
 }

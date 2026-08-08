@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cstdint>
 #include <TFT_eSPI.h>
+#include <random>
 using namespace std;
 
 const unsigned int BOARD_WIDTH = 10;
@@ -33,6 +34,10 @@ const unsigned int CELL_SIZE = 4;
 
 const unsigned int ROTATION = 4;
 const unsigned int COORDINATE = 4;
+
+
+//list of tetrominoes, for spawning, choosing next one 
+extern char tetrominoList[7];
 
 struct Block {
 
@@ -94,4 +99,6 @@ void lockTetromino (TFT_eSPI& tft, Tetromino& piece,
 bool blockCollision(Tetromino& piece, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT], int x, int y);
 
 void drawGhostBlock(TFT_eSPI &tft, unsigned int x, unsigned int y, uint16_t colour);
+
+Tetromino spawnTetromino();
 #endif
