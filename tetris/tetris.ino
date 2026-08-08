@@ -13,7 +13,7 @@ const int ROTATE = 27;
 const int HOLD = 14;
 
 //variables to prevent the hard_drop button from triggering too quickly 
-const unsigned long HARD_DROP_RELEASE_DELAY = 200;
+const unsigned long HARD_DROP_RELEASE_DELAY = 150;
 bool hardDropReady = true;
 unsigned long hardDropReleaseTime = 0;
 
@@ -48,7 +48,7 @@ bool moveCursor = HIGH;
 int counter = 0;
 void loop() {
     //drawTetromino(tft, board, boi, xCursor, yCursor);
-
+    
     //moveCursor prevents the block from moving multiple times when the button 
     //is pressed only once 
 
@@ -71,7 +71,7 @@ void loop() {
                 xCursor = xCursor - 1;
                 //stops movement
 
-                printBoard(board);
+                //printBoard(board);
                 Serial.print("cursor is at (");
                 Serial.print(xCursor);
                 Serial.print(", ");
@@ -93,7 +93,7 @@ void loop() {
                 //move cursor one block right instead of left 
                 xCursor = xCursor + 1;
    
-                printBoard(board);
+                //printBoard(board);
                 Serial.print("cursor is at (");
                 Serial.print(xCursor);
                 Serial.print(", ");
@@ -113,7 +113,7 @@ void loop() {
             rotateTetromino(tft, boi, board, xCursor, yCursor);
 
 
-            printBoard(board); 
+            //printBoard(board); 
             Serial.print("cursor is at (");
             Serial.print(xCursor);
             Serial.print(", ");
@@ -141,7 +141,7 @@ void loop() {
             Serial.print(") \n");
 
 
-        }
+        } 
         
 
     } else {
