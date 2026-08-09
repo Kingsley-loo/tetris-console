@@ -26,6 +26,20 @@ Tetromino::Tetromino(Cell newShape[ROTATION][COORDINATE], unsigned int newX,
 
 }
 
+//default constructor
+Tetromino::Tetromino() {
+    for (int i = 0; i < ROTATION; i++) {
+        for (int j = 0; j < COORDINATE; j++) {
+            shape[i][j] = {0, 0};
+        }
+    }
+
+    x = 0;
+    y = 0;
+    colour = BLACK;
+    orientation = 0;
+}
+
 //creates tetrominos based on the type. 
 Tetromino createTetromino(char type) {
 
@@ -524,14 +538,24 @@ bool blockCollision(Tetromino& piece, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
     return false;
 }
 
-Tetromino spawnTetromino() {
+Tetromino spawnTetromino(TFT_eSPI& tft) {
     random_device rd; 
 
     mt19937 gen(rd()); 
 
     uniform_int_distribution<int> dist(0, 6); 
-
     int randomNum = dist(gen); 
+    Tetromino piece = createTetromino(tetrominoList[randomNum]);
 
-    return (createTetromino(tetrominoList[randomNum]));
+     for (int i = 0; i < CELL_SIZE; i++) {
+        int xBlock = (piece.shape[0][i].x * 15) + 170;
+        int yBlock = (piece.shape[0][i].y * 15) + 35;
+        tft.drawRect(xBlock, yBlock, 15, 15, WHITE);
+        tft.fillRect(xBlock +1, yBlock + 1, 13, 13, piece.colour);
+
+    }
+
+    return piece;
+
 }
+

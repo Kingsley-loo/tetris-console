@@ -27,8 +27,8 @@ constexpr uint16_t VIOLET = 0x915C;
 const unsigned int GAME_WINDOW_WIDTH = 155;
 const unsigned int GAME_WINDOW_HEIGHT = 305; 
 
-const unsigned int NEXT_WINDOW_WIDTH = 65;
-const unsigned int NEXT_WINDOW_HEIGHT = 65; 
+const unsigned int NEXT_WINDOW_WIDTH = 70;
+const unsigned int NEXT_WINDOW_HEIGHT = 70; 
 
 const unsigned int CELL_SIZE = 4;
 
@@ -69,6 +69,8 @@ class Tetromino {
 
         Tetromino(Cell newShape[ROTATION][COORDINATE], unsigned int newX, unsigned int newY, uint16_t newColour, int newOrientation);
 
+        Tetromino();
+
 };
 
 void printBoard(Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]);
@@ -100,5 +102,5 @@ bool blockCollision(Tetromino& piece, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
 
 void drawGhostBlock(TFT_eSPI &tft, unsigned int x, unsigned int y, uint16_t colour);
 
-Tetromino spawnTetromino();
+Tetromino spawnTetromino(TFT_eSPI& tft);
 #endif
