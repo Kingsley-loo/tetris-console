@@ -15,6 +15,8 @@ const int HOLD = 14;
 //variables to prevent the hard_drop button from triggering too quickly 
 const unsigned long HARD_DROP_DELAY = 600;
 const unsigned long BUTTON_DELAY = 275; 
+const unsigned long LOCK_TETROMINO_DELAY = 500; 
+bool hardDropReady = true; 
 bool buttonReady = true;
 unsigned long buttonReleaseTime = 0;
 
@@ -66,7 +68,8 @@ void loop() {
     //left movement 
     if (buttonReady) {
         if (digitalRead(LEFT) == LOW) {
-            if ((wallCollision(playingPiece, xCursor -1, yCursor) == LOW) && (blockCollision(playingPiece, board, (xCursor -1), yCursor) == LOW))  {
+            if ((wallCollision(playingPiece, xCursor -1, yCursor) == LOW) 
+                        && (blockCollision(playingPiece, board, (xCursor -1), yCursor) == LOW))  {
                 //draw Tetromino in new location, drawing black empty blocks in the previous location 
 
                 buttonReady = false; 
@@ -93,7 +96,8 @@ void loop() {
         
         //right movement, same logic as left 
         else if (digitalRead(RIGHT) == LOW) {
-            if ((wallCollision(playingPiece, xCursor +1, yCursor) == LOW) && (blockCollision(playingPiece, board, (xCursor + 1), yCursor) == LOW)) {
+            if ((wallCollision(playingPiece, xCursor +1, yCursor) == LOW) 
+                            && (blockCollision(playingPiece, board, (xCursor + 1), yCursor) == LOW)) {
 
                 buttonReady = false; 
                 drawTetromino(tft, board, playingPiece, xCursor + 1, yCursor, xCursor, yCursor);
@@ -138,6 +142,8 @@ void loop() {
             buttonReady = false; 
             lockTetromino(tft, playingPiece, board, xCursor, yCursor);
             playingTetromino = false; 
+            redrawBoard(tft, board); 
+            //printBoard(board); 
             buttonReleaseTime = millis();
             Serial.print("cursor is at (");
             Serial.print(xCursor);
@@ -145,18 +151,53 @@ void loop() {
             Serial.print(yCursor);
             Serial.print(") \n");
 
+            
 
-        } 
+        //moves the tetromino one row down 
+        } else if (digitalRead(SOFT_DROP) == LOW) {
+
+            if ((wallCollision(playingPiece, xCursor, yCursor + 1) == LOW) 
+                                    && (blockCollision(playingPiece, board, xCursor, yCursor + 1) == LOW)) {
+                buttonReady = false; 
+                drawTetromino(tft, board, playingPiece, xCursor, yCursor + 1, xCursor, yCursor);
+                yCursor = yCursor + 1;
+                buttonReleaseTime = millis();
+                Serial.print("cursor is at (");
+                Serial.print(xCursor);
+                Serial.print(", ");
+                Serial.print(yCursor);
+                Serial.print(") \n");
+            //if the tetromino cannot move any further but soft_drop is still held down, 
+            //lock the tetromino into the board. 
+            } else {
+                lockTetromino(tft, playingPiece, board, xCursor, yCursor);
+                buttonReady = false; 
+                playingTetromino = false; 
+                redrawBoard(tft, board); 
+                //printBoard(board); 
+                buttonReleaseTime = millis();
+            }
+
+
+        } else if ((millis() - buttonReleaseTime >= LOCK_TETROMINO_DELAY) 
+                    && ((wallCollision(playingPiece, xCursor, yCursor + 1) == HIGH) 
+                            || (blockCollision(playingPiece, board, xCursor, yCursor + 1) == HIGH))) {
+                    lockTetromino(tft, playingPiece, board, xCursor, yCursor);
+                    playingTetromino = false; 
+                    redrawBoard(tft, board); 
+                    //printBoard(board); 
+                    buttonReady = true; 
+
+                }
         
 
     } else {
-        /*if ((digitalRead(LEFT) == HIGH) && (digitalRead(RIGHT) == HIGH) 
-                    && (digitalRead(ROTATE) == HIGH) && (digitalRead(HARD_DROP) == HIGH))   {
-            
 
-        }*/
         if ((millis() - buttonReleaseTime >= BUTTON_DELAY) || (millis() - buttonReleaseTime >= HARD_DROP_DELAY))  {
+
                 buttonReady = true;
+
+
         }
 
     }

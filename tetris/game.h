@@ -103,4 +103,8 @@ bool blockCollision(Tetromino& piece, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
 void drawGhostBlock(TFT_eSPI &tft, unsigned int x, unsigned int y, uint16_t colour);
 
 Tetromino spawnTetromino(TFT_eSPI& tft);
+
+void shuffleBag();
+
+void redrawBoard(TFT_eSPI tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]);
 #endif

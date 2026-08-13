@@ -3,11 +3,10 @@
 #include <cstdint>
 #include <TFT_eSPI.h>
 #include <iomanip>
-#include <random>
 using namespace std;
 
 char tetrominoList[7] = {'R', 'G', 'C', 'O', 'B', 'P', 'Y'};
-
+int bagIndex = 7;
 
 //constructor called in createTetromino 
 Tetromino::Tetromino(Cell newShape[ROTATION][COORDINATE], unsigned int newX,
@@ -40,7 +39,7 @@ Tetromino::Tetromino() {
     orientation = 0;
 }
 
-//creates tetrominos based on the type. 
+//creates tetrominoes based on the type. 
 Tetromino createTetromino(char type) {
 
     switch(type) {
@@ -180,7 +179,7 @@ string colourName(uint16_t colour) {
 }
 
 //prints out each block on the game board for debugging, shows if occupied and what colour 
-/*
+
 void printBoard(Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
     const int CELL_PRINT_WIDTH = 30;
 
@@ -213,8 +212,8 @@ void printBoard(Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
 
         cout << endl;
     }
-}*/
-
+}
+/*
 void printBoard(Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
     unsigned int count = 1;
     cout << "bruh" << endl;
@@ -224,12 +223,12 @@ void printBoard(Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
             Serial.print(count);
             Serial.print(" : ");
             Serial.print(colourName(board[j][i].colour).c_str());
-            /*
+            
             if (board[j][i].occupied == true) {
                 Serial.print("TRUE");
             } else {
                 Serial.print("FALSE");
-            }*/
+            }
             Serial.print(" ");
             count++;
         }   
@@ -238,7 +237,7 @@ void printBoard(Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
 
     return;
 
-}
+}*/
 
 //draws blocks. 
 void drawBlock(TFT_eSPI &tft, unsigned int x, unsigned int y, uint16_t colour) {
@@ -264,7 +263,7 @@ void drawGhostBlock(TFT_eSPI &tft, unsigned int x, unsigned int y, uint16_t colo
     return;
 }
 
-//sets up the main home screen of the game, board layout, score, next tetrominos, held tetromino 
+//sets up the main home screen of the game, board layout, score, next tetrominoes, held tetromino 
 void LoadHomescreen(TFT_eSPI& tft) {
 
     tft.setTextSize(2);
@@ -276,8 +275,11 @@ void LoadHomescreen(TFT_eSPI& tft) {
 
     tft.drawString("HOLD:", 165, 105);
     tft.drawRect(165, 125, NEXT_WINDOW_WIDTH, NEXT_WINDOW_HEIGHT, WHITE);
+    tft.drawString("LEVEL:", 165, 219); 
+    tft.drawString("1", 165, 239);
     tft.drawString("SCORE:", 165, 274);
     tft.drawString("123456", 165, 294);
+
 
     return; 
 
@@ -359,38 +361,16 @@ void deleteTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
 
 }
 
-//used for redrawing the Tetromino 
+//used for redrawing the Tetromino (when it moves left or right)
+//need to add for when it moves down 
 void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
                     Tetromino& piece, int x, int y, int xPrev, int yPrev) {
     int ori = piece.orientation; 
-    //loop that removes tetromino from old location 
-    /*for (int i = 0; i < CELL_SIZE; i++) {
-        int xCorPrev = piece.shape[ori][i].x + xPrev;
-        int yCorPrev = piece.shape[ori][i].y + yPrev;
 
-        //Serial.println(yCor);
-        
-        drawBlock(tft, xCorPrev, yCorPrev, BLACK);
-
-        //colours the previous block location to black 
-        board[xCorPrev][yCorPrev].colour = BLACK;
-
-
-
-    //draw cube with colour from cell[i] = (x, y) to board[i][j]
-
-    }*/
-   deleteTetromino(tft, board, piece, xPrev, yPrev);
+    //remove tetromino from old location 
+    deleteTetromino(tft, board, piece, xPrev, yPrev);
     // loop that draws tetromino in new location 
-    for (int i = 0; i < CELL_SIZE; i++) {
-        int xCor = piece.shape[ori][i].x + x;
-        //Serial.println(xCor);
-        int yCor = piece.shape[ori][i].y + y;
-        drawBlock(tft, xCor, yCor, piece.colour);
-        board[xCor][yCor].colour = piece.colour;
 
-        
-    }
     int counter = 0; 
     while (!(wallCollision(piece, x, y + counter + 1)) 
                     && !(blockCollision(piece, board, x, y + counter + 1))) {
@@ -413,6 +393,15 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
         int yCor = piece.shape[piece.orientation][i].y + y;
         //Serial.println(yCor);
         drawGhostBlock(tft, xCor, yCor + counter, piece.colour);
+    }
+    for (int i = 0; i < CELL_SIZE; i++) {
+
+        int xCor = piece.shape[ori][i].x + x;
+        //Serial.println(xCor);
+        int yCor = piece.shape[ori][i].y + y;
+        drawBlock(tft, xCor, yCor, piece.colour);
+        board[xCor][yCor].colour = piece.colour;
+
     }
     return;
     
@@ -493,6 +482,7 @@ void rotateTetromino(TFT_eSPI& tft, Tetromino& piece,
 //without collisions 
 void lockTetromino (TFT_eSPI& tft, Tetromino& piece, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT], int xCursor, int yCursor) {
     int counter = 0; 
+    deleteTetromino(tft, board, piece, xCursor, yCursor);
     while (!(wallCollision(piece, xCursor, yCursor + counter + 1)) && 
                         !(blockCollision(piece, board, xCursor, yCursor + counter + 1))) {
         counter++; 
@@ -509,7 +499,7 @@ void lockTetromino (TFT_eSPI& tft, Tetromino& piece, Block (&board)[BOARD_WIDTH]
         //draw block on display 
         drawBlock(tft, xLock, yLock, board[xLock][yLock].colour); 
     }
-    deleteTetromino(tft, board, piece, xCursor, yCursor);
+    return;
 }
 
 //checks if the blocks for the future location of a tetromino is occupied. 
@@ -538,16 +528,35 @@ bool blockCollision(Tetromino& piece, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
     return false;
 }
 
+//shuffles the tetrominoList after each tetromino has spawned at least once. 
+void shuffleBag() {
+    for (int i = 6; i > 0; i--) {
+
+        int j = random(0, i + 1);
+
+        char temp = tetrominoList[i];
+        tetrominoList[i] = tetrominoList[j];
+        tetrominoList[j] = temp;
+    }
+
+    bagIndex = 0;
+}
+
+
 Tetromino spawnTetromino(TFT_eSPI& tft) {
-    random_device rd; 
+    //shuffles tetrominoList if needed
+    if (bagIndex >= 7) {
+        shuffleBag();
+    }
 
-    mt19937 gen(rd()); 
+    Tetromino piece = createTetromino(tetrominoList[bagIndex]);
+    bagIndex++;; 
 
-    uniform_int_distribution<int> dist(0, 6); 
-    int randomNum = dist(gen); 
-    Tetromino piece = createTetromino(tetrominoList[randomNum]);
-
-     for (int i = 0; i < CELL_SIZE; i++) {
+    
+    //clears out the nextPiece window 
+    tft.fillRect(166, 26, 68, 68, BLACK);
+    //draws the next Tetromino 
+    for (int i = 0; i < CELL_SIZE; i++) {
         int xBlock = (piece.shape[0][i].x * 15) + 170;
         int yBlock = (piece.shape[0][i].y * 15) + 35;
         tft.drawRect(xBlock, yBlock, 15, 15, WHITE);
@@ -558,4 +567,36 @@ Tetromino spawnTetromino(TFT_eSPI& tft) {
     return piece;
 
 }
+
+//call function after each loop of the game. 
+void redrawBoard(TFT_eSPI tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
+    
+    // loop that checks each row if every cell is occupied 
+    for (int j = 0; j < BOARD_HEIGHT; j++) {
+        int counter = 0; 
+        for (int i = 0; i < BOARD_WIDTH; i++) {
+            if (board[i][j].occupied == true) {
+                counter++;
+
+            }
+        }
+
+        //if a row if occupied, copy the previous row onto it 
+        if (counter == 10) { 
+            for (int k = j; k > 0; k--) {
+                for (int i = 0; i < BOARD_WIDTH; i++) {
+                    //copying over data from block in previous row
+                    board[i][k].colour = board[i][k-1].colour;
+                    board[i][k].occupied = board[i][k-1].occupied; 
+                    drawBlock(tft, i, k, board[i][k].colour);
+                }
+            }
+        }
+    }
+
+}
+
+
+
+
 
