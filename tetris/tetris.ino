@@ -13,12 +13,14 @@ const int ROTATE = 27;
 const int HOLD = 14;
 
 //variables to prevent the hard_drop button from triggering too quickly 
-const unsigned long HARD_DROP_DELAY = 600;
+const unsigned long HARD_DROP_DELAY = 800;
 const unsigned long BUTTON_DELAY = 275; 
 const unsigned long LOCK_TETROMINO_DELAY = 500; 
+const unsigned long MOVE_DOWN = 1000;
 bool hardDropReady = true; 
 bool buttonReady = true;
 unsigned long buttonReleaseTime = 0;
+unsigned long moveDownTime = 0;
 
 //game board, all collision logic is done here. 
 Block board[BOARD_WIDTH][BOARD_HEIGHT];
@@ -179,29 +181,52 @@ void loop() {
             }
 
 
-        } else if ((millis() - buttonReleaseTime >= LOCK_TETROMINO_DELAY) 
-                    && ((wallCollision(playingPiece, xCursor, yCursor + 1) == HIGH) 
-                            || (blockCollision(playingPiece, board, xCursor, yCursor + 1) == HIGH))) {
-                    lockTetromino(tft, playingPiece, board, xCursor, yCursor);
-                    playingTetromino = false; 
-                    redrawBoard(tft, board); 
-                    //printBoard(board); 
-                    buttonReady = true; 
-
-                }
+        } 
         
 
+    //this slows down how many times a button can be activated when held down. 
     } else {
 
         if ((millis() - buttonReleaseTime >= BUTTON_DELAY) || (millis() - buttonReleaseTime >= HARD_DROP_DELAY))  {
 
                 buttonReady = true;
 
-
-        }
+        }                   
 
     }
 
+    //automatic gravity of tetromino 
+    if (digitalRead(SOFT_DROP) == HIGH) {
+        //interval that moves the tetromino down 
+        if (millis() - moveDownTime >= MOVE_DOWN) {
+            drawTetromino(tft, board, playingPiece, xCursor, yCursor + 1, xCursor, yCursor);
+            yCursor = yCursor + 1;
+            moveDownTime = millis();
+            
+        }
+    
+    }
 
+    //if no buttons are pressed, and the tetromino experiences a block or wall collision, 
+    //lock it into the board, and spawn a new piece. 
+    if ((millis() - moveDownTime >= LOCK_TETROMINO_DELAY) && (millis() - buttonReleaseTime >= BUTTON_DELAY)
+                && ((wallCollision(playingPiece, xCursor, yCursor + 1) == HIGH) 
+                        || (blockCollision(playingPiece, board, xCursor, yCursor + 1) == HIGH))) {
+
+        lockTetromino(tft, playingPiece, board, xCursor, yCursor);
+        playingTetromino = false; 
+        redrawBoard(tft, board); 
+        //printBoard(board); 
+        buttonReady = true; 
+        moveDownTime = millis(); 
+
+    }
 }
+
+
+
+
+
+
+
 
