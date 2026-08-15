@@ -21,6 +21,9 @@ const unsigned long MOVE_DOWN = 1000;
 unsigned long buttonReleaseTime = 0;
 unsigned long moveDownTime = 0;
 
+int gameScore = 0;
+int level = 1; 
+
 //game board, all collision logic is done here. 
 Block board[BOARD_WIDTH][BOARD_HEIGHT];
 
@@ -71,7 +74,8 @@ void loop() {
         }
 
         startMenu = false;
-
+        gameScore = 0;
+        level = 1; 
 
         delay(200);
     }
@@ -173,7 +177,10 @@ void loop() {
             buttonReady = false; 
             lockTetromino(tft, playingPiece, board, xCursor, yCursor);
             playingTetromino = false; 
-            redrawBoard(tft, board); 
+            int rows = redrawBoard(tft, board); 
+            int distance = BOARD_HEIGHT - yCursor; 
+            gameScore = gameScore + calculateScore(rows, distance, level); 
+            updateGameScore(tft, gameScore);
             //printBoard(board); 
             buttonReleaseTime = millis();
             Serial.print("cursor is at (");
@@ -193,6 +200,8 @@ void loop() {
                 buttonReady = false; 
                 drawTetromino(tft, board, playingPiece, xCursor, yCursor + 1, xCursor, yCursor);
                 yCursor = yCursor + 1;
+                gameScore = gameScore + calculateScore(0, 1, level); 
+                updateGameScore(tft, gameScore);
                 buttonReleaseTime = millis();
                 Serial.print("cursor is at (");
                 Serial.print(xCursor);
@@ -201,11 +210,14 @@ void loop() {
                 Serial.print(") \n");
             //if the tetromino cannot move any further but soft_drop is still held down, 
             //lock the tetromino into the board. 
-            } else {
+            } else if ((wallCollision(playingPiece, xCursor, yCursor + 1) == HIGH) 
+                                    || (blockCollision(playingPiece, board, xCursor, yCursor + 1) == HIGH)) {
                 lockTetromino(tft, playingPiece, board, xCursor, yCursor);
                 buttonReady = false; 
                 playingTetromino = false; 
-                redrawBoard(tft, board); 
+                int rows = redrawBoard(tft, board); 
+                gameScore = gameScore + calculateScore(rows, 0, level);
+                updateGameScore(tft, gameScore);
                 canHold = true;
                 //printBoard(board); 
                 buttonReleaseTime = millis();
@@ -279,8 +291,11 @@ void loop() {
                         || (blockCollision(playingPiece, board, xCursor, yCursor + 1) == HIGH)) && (playingTetromino == true)) {
 
         lockTetromino(tft, playingPiece, board, xCursor, yCursor);
+
         playingTetromino = false; 
-        redrawBoard(tft, board); 
+        int rows = redrawBoard(tft, board); 
+        gameScore = gameScore + calculateScore(rows, 0, level);
+        updateGameScore(tft, gameScore);
         //printBoard(board); 
         buttonReady = true; 
         canHold = true; 

@@ -108,11 +108,15 @@ Tetromino spawnTetromino(TFT_eSPI& tft);
 
 void shuffleBag();
 
-void redrawBoard(TFT_eSPI tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]);
+int redrawBoard(TFT_eSPI tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]);
 
 void clearNextWindow(TFT_eSPI& tft);
 
 void clearHoldWindow(TFT_eSPI& tft);
 
 void loadStartMenu(TFT_eSPI& tft);
+
+int calculateScore (int rows, int distance, int level);
+
+void updateGameScore(TFT_eSPI& tft, int gameScore);
 #endif

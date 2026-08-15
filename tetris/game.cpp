@@ -278,8 +278,7 @@ void LoadHomescreen(TFT_eSPI& tft) {
     tft.drawString("LEVEL:", 165, 219); 
     tft.drawString("1", 165, 239);
     tft.drawString("SCORE:", 165, 274);
-    tft.drawString("123456", 165, 294);
-
+    updateGameScore(tft, 0); 
 
     return; 
 
@@ -573,8 +572,9 @@ Tetromino spawnTetromino(TFT_eSPI& tft) {
 }
 
 //call function after each loop of the game. 
-void redrawBoard(TFT_eSPI tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
-    
+//returns the number of rows that were completely occupied (and removed from the board)
+int redrawBoard(TFT_eSPI tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
+    int rows = 0; 
     // loop that checks each row if every cell is occupied 
     for (int j = 0; j < BOARD_HEIGHT; j++) {
         int counter = 0; 
@@ -587,6 +587,7 @@ void redrawBoard(TFT_eSPI tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
 
         //if a row if occupied, copy the previous row onto it 
         if (counter == 10) { 
+            rows++;
             for (int k = j; k > 0; k--) {
                 for (int i = 0; i < BOARD_WIDTH; i++) {
                     //copying over data from block in previous row
@@ -598,7 +599,9 @@ void redrawBoard(TFT_eSPI tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
         }
     }
 
-    return;
+
+
+    return rows; 
 
 }
 
@@ -685,7 +688,39 @@ void loadStartMenu(TFT_eSPI& tft) {
     return;
 }
 
+//scoring system, based off the official tetris scoring system. 
 
+int calculateScore (int rows, int distance, int level) {
 
+    //score varies with different levels and number of rows cleared
+    switch(rows) {
+        //single 
+        case 1: {
+            return ((rows * 100 * level) + (distance * 4));
+        }
+        //double
+        case 2: {
+            return ((rows * 300 * level) + (distance * 4));
+        }
+        //triple 
+        case 3: {
+            return ((rows * 500 * level) + (distance * 4));
+        }
+        //tetris
+        case 4: {
+            return ((rows * 800 * level) + (distance * 4));
+        }
+        case 0: {
+            return (distance * 4); 
+        }
+    }
 
+}
+
+//draws the current game score
+void updateGameScore(TFT_eSPI& tft, int gameScore) {
+    string score = to_string(gameScore); 
+    tft.fillRect(165, 294, 80, 20, BLACK);
+    tft.drawString(score.c_str(), 165, 294); 
+}
 
