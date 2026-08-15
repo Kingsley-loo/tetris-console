@@ -288,8 +288,7 @@ void LoadHomescreen(TFT_eSPI& tft) {
 //assuming the piece is within the boundaries of the board 
 void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
                     Tetromino& piece, int x, int y) {
-    int xValue = 0;
-    int yValue = 0;
+
     //for int i = 0, i < max_size(array Cell), i++
     for (int i = 0; i < CELL_SIZE; i++) {
         int xCor = piece.shape[piece.orientation][i].x + x;
@@ -299,9 +298,7 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
         //Serial.println(yCor);
         drawBlock(tft, xCor, yCor, piece.colour);
         board[xCor][yCor].colour = piece.colour;
-        xValue = xCor;
-        yValue = yCor; 
-    //draw cube with colour from cell[i] = (x, y) to board[i][j]\
+    //draw cube with colour from cell[i] = (x, y) to board[i][j]
 
     }
 
@@ -405,6 +402,21 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
     }
     return;
     
+}
+
+//for drawing tetrominoes in the "next" and "hold" boxes 
+void drawTetromino(TFT_eSPI& tft, Tetromino& piece, int x, int y) {
+    
+
+    for (int i = 0; i < CELL_SIZE; i++) {
+        int xBlock = (piece.shape[piece.orientation][i].x * 15) + x;
+        int yBlock = (piece.shape[piece.orientation][i].y * 15) + y;
+        tft.drawRect(xBlock, yBlock, 15, 15, WHITE);
+        tft.fillRect(xBlock +1, yBlock + 1, 13, 13, piece.colour);
+
+    }
+
+    return;
 }
 
 //x and y are the values that the cursor wants to move to 
@@ -540,6 +552,7 @@ void shuffleBag() {
     }
 
     bagIndex = 0;
+    return; 
 }
 
 
@@ -553,16 +566,7 @@ Tetromino spawnTetromino(TFT_eSPI& tft) {
     bagIndex++;; 
 
     
-    //clears out the nextPiece window 
-    tft.fillRect(166, 26, 68, 68, BLACK);
-    //draws the next Tetromino 
-    for (int i = 0; i < CELL_SIZE; i++) {
-        int xBlock = (piece.shape[0][i].x * 15) + 170;
-        int yBlock = (piece.shape[0][i].y * 15) + 35;
-        tft.drawRect(xBlock, yBlock, 15, 15, WHITE);
-        tft.fillRect(xBlock +1, yBlock + 1, 13, 13, piece.colour);
 
-    }
 
     return piece;
 
@@ -594,6 +598,91 @@ void redrawBoard(TFT_eSPI tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]) {
         }
     }
 
+    return;
+
+}
+
+void clearNextWindow(TFT_eSPI& tft) {
+    //clears out the nextPiece window 
+    tft.fillRect(166, 26, 68, 68, BLACK);
+    return;
+}
+
+void clearHoldWindow(TFT_eSPI& tft) {
+    //clears out the holdPiece window 
+    tft.fillRect(166, 126, 68, 68, BLACK);
+    return;
+}
+
+//just stuff to make the start menu look nice 
+void loadStartMenu(TFT_eSPI& tft) {
+
+
+        tft.setTextSize(4); 
+        tft.fillScreen(BLACK); 
+        tft.drawCentreString("TETRIS", 120, 144, 1);
+        tft.setTextSize(2);
+
+        Tetromino cyan = createTetromino('C');
+        Tetromino red = createTetromino('R');
+        Tetromino green = createTetromino('G');
+        Tetromino blue = createTetromino('B');
+        Tetromino yellow = createTetromino('Y');
+        Tetromino orange = createTetromino('O');
+        Tetromino purple = createTetromino('P');
+
+        tft.drawCentreString("Press any button", 120, 182, 1);
+
+        // bottom-left decoration
+        cyan.orientation = 2;
+        drawTetromino(tft, cyan, 0, 305);
+
+        yellow.orientation = 2;
+        drawTetromino(tft, yellow, 0, 275);
+
+        blue.orientation = 3;
+        drawTetromino(tft, blue, 30, 260);
+
+        orange.orientation = 1;
+        drawTetromino(tft, orange, 60, 275);
+
+        green.orientation = 3;
+        drawTetromino(tft, green, 75, 275);
+
+        purple.orientation = 3;
+        drawTetromino(tft, purple, 15, 245);
+
+        red.orientation = 3;
+        drawTetromino(tft, red, 0, 230);
+
+        blue.orientation = 0;
+        drawTetromino(tft, blue, 105, 290);
+
+        purple.orientation = 1;
+        drawTetromino(tft, purple, 0, 200);
+        //bottom-right decoration
+        cyan.orientation = 0;
+        drawTetromino(tft, cyan, 180, 0);
+        yellow.orientation = 0;
+        drawTetromino(tft, yellow, 210, 15);
+        blue.orientation = 1;
+        drawTetromino(tft, blue, 180, 15);
+        orange.orientation = 3;
+        drawTetromino(tft, orange, 150, 0);
+        green.orientation = 1;
+        drawTetromino(tft, green, 135, 0);
+        purple.orientation = 1;
+        drawTetromino(tft, purple, 195, 30);
+        red.orientation = 1;
+        drawTetromino(tft, red, 210, 45);
+        blue.orientation = 2;
+        drawTetromino(tft, blue, 90, 0);
+        purple.orientation = 3; 
+        drawTetromino(tft, purple, 210, 75);
+
+
+
+    return;
 }
 
 

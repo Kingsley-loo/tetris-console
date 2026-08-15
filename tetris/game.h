@@ -87,6 +87,8 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
 void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
                     Tetromino& piece, int x, int y, int xPrev, int yPrev);
 
+void drawTetromino(TFT_eSPI& tft, Tetromino& piece, int x, int y);
+
 bool wallCollision(Tetromino& piece, int  x, int y);
 
 void deleteTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
@@ -107,4 +109,10 @@ Tetromino spawnTetromino(TFT_eSPI& tft);
 void shuffleBag();
 
 void redrawBoard(TFT_eSPI tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT]);
+
+void clearNextWindow(TFT_eSPI& tft);
+
+void clearHoldWindow(TFT_eSPI& tft);
+
+void loadStartMenu(TFT_eSPI& tft);
 #endif
