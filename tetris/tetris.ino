@@ -4,7 +4,7 @@
 //display 
 
 TFT_eSPI tft = TFT_eSPI();
-unsigned long levelSpeed[10] = {800, 700, 600, 500, 400, 320, 250, 200, 160, 130};
+unsigned long levelSpeed[10] = {800, 700, 600, 500, 400, 320, 250, 200, 180, 175};
 
 //pin numbers for the buttons 
 const int HARD_DROP = 32;
@@ -19,14 +19,15 @@ int level = 1;
 int rowsCleared = 0; 
 
 //variables to prevent the hard_drop button from triggering too quickly 
-const unsigned long HARD_DROP_DELAY = 800;
-const unsigned long BUTTON_DELAY = 200; 
+const unsigned long HARD_DROP_DELAY = 275;
+const unsigned long BUTTON_DELAY = 175; 
 const unsigned long LOCK_TETROMINO_DELAY = 500; 
 unsigned long gravity = levelSpeed[level + 1];
 
 unsigned long buttonReleaseTime = 0;
 unsigned long moveDownTime = 0;
 unsigned long hardDropReleaseTime = 0;
+unsigned long softDropTime = 0;
 /*                
 Serial.print("cursor is at (");
 Serial.print(xCursor);
@@ -67,9 +68,6 @@ void setup() {
     pinMode(RIGHT, INPUT_PULLUP);
     pinMode(ROTATE, INPUT_PULLUP);
     pinMode(HOLD, INPUT_PULLUP);
-
-
-
 }
 
 void loop() {
@@ -124,6 +122,8 @@ void loop() {
             playingTetromino = true; 
             clearNextWindow(tft); 
             drawTetromino(tft, nextPiece, 170, 35);
+
+            //stuff to check if the game should end (too many tetrominoes) 
             if ((wallCollision(playingPiece, xCursor, yCursor + 1) == HIGH) 
                         || (blockCollision(playingPiece, board, xCursor, yCursor + 1) == HIGH)) {
                     
@@ -198,26 +198,27 @@ void loop() {
             
             //lock Tetromino and draw blocks onto board
             } else if (digitalRead(HARD_DROP) == LOW) {
-
-                hardDropReleaseTime = millis();
-                //prevents the hard_drop button from being pressed multiple times 
-                buttonReady = false; 
-                lockTetromino(tft, playingPiece, board, xCursor, yCursor);
-                playingTetromino = false; 
-                int rows = redrawBoard(tft, board); 
-                rowsCleared = rowsCleared + rows; 
-                int distance = BOARD_HEIGHT - yCursor; 
-                gameScore = gameScore + calculateScore(rows, distance, level); 
-                updateGameScore(tft, gameScore);
-                //printBoard(board); 
-                buttonReleaseTime = millis();
-                canHold = true; 
+                if ((millis() - hardDropReleaseTime >= HARD_DROP_DELAY)) {
+                    hardDropReleaseTime = millis();
+                    //prevents the hard_drop button from being pressed multiple times 
+                    buttonReady = false; 
+                    lockTetromino(tft, playingPiece, board, xCursor, yCursor);
+                    playingTetromino = false; 
+                    int rows = redrawBoard(tft, board); 
+                    rowsCleared = rowsCleared + rows; 
+                    int distance = BOARD_HEIGHT - yCursor; 
+                    gameScore = gameScore + calculateScore(rows, distance, level); 
+                    updateGameScore(tft, gameScore);
+                    //printBoard(board); 
+                    buttonReleaseTime = millis();
+                    canHold = true; 
+                }
+                
 
                 
 
             //moves the tetromino one row down 
             } else if (digitalRead(SOFT_DROP) == LOW) {
-
                 if ((wallCollision(playingPiece, xCursor, yCursor + 1) == LOW) 
                                         && (blockCollision(playingPiece, board, xCursor, yCursor + 1) == LOW)) {
                     buttonReady = false; 
@@ -286,11 +287,6 @@ void loop() {
                     buttonReady = true;
 
             }   
-            IF ((millis() - hardDropReleaseTime >= HARD_DROP_DELAY)) {
-
-                hardDropReleaseTime = 0;
-
-            }
                             
 
         }
@@ -329,6 +325,7 @@ void loop() {
 
         }
 
+        //increases level every 10 rows cleared
         if ((rowsCleared >= 9) && (level != 10)) {
             level++; 
 
