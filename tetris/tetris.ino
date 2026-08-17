@@ -2,7 +2,9 @@
 #include <string>
 
 //display 
+
 TFT_eSPI tft = TFT_eSPI();
+unsigned long levelSpeed[10] = {800, 700, 600, 500, 400, 320, 250, 200, 160, 130};
 
 //pin numbers for the buttons 
 const int HARD_DROP = 32;
@@ -12,17 +14,27 @@ const int RIGHT = 26;
 const int ROTATE = 27;
 const int HOLD = 14;
 
+int gameScore = 0;
+int level = 1; 
+int rowsCleared = 0; 
+
 //variables to prevent the hard_drop button from triggering too quickly 
 const unsigned long HARD_DROP_DELAY = 800;
-const unsigned long BUTTON_DELAY = 275; 
+const unsigned long BUTTON_DELAY = 200; 
 const unsigned long LOCK_TETROMINO_DELAY = 500; 
-const unsigned long MOVE_DOWN = 1000;
+unsigned long gravity = levelSpeed[level + 1];
 
 unsigned long buttonReleaseTime = 0;
 unsigned long moveDownTime = 0;
+unsigned long hardDropReleaseTime = 0;
+/*                
+Serial.print("cursor is at (");
+Serial.print(xCursor);
+Serial.print(", ");
+Serial.print(yCursor);
+Serial.print(") \n");
+*/
 
-int gameScore = 0;
-int level = 1; 
 
 //game board, all collision logic is done here. 
 Block board[BOARD_WIDTH][BOARD_HEIGHT];
@@ -74,32 +86,67 @@ void loop() {
         }
 
         startMenu = false;
-        gameScore = 0;
-        level = 1; 
 
         delay(200);
     }
 
+    //once the game is about to begin, resets all game values 
     if (!(gameStart)) {
         gameStart = true; 
+        gameScore = 0; 
         LoadHomescreen(tft);
         nextPiece = spawnTetromino(tft);
+        rowsCleared = 0; 
+        level = 1;
+        gravity = levelSpeed[level + 1];
+        updateLevel(tft, level); 
+        //clears the game board 
+        for (int j = 0; j < BOARD_HEIGHT; j++) {
+            for (int i = 0; i < BOARD_WIDTH; i++) {
+                board[i][j].occupied = false; 
+                board[i][j].colour = BLACK;
+            }
+        }
     }
 
-    //spawns a new tetromino if one has been placed onto the board already 
-    if (playingTetromino == false) {
-        //only if the HOLD button hasnt already been placed before locking 
-        //the tetromino into the board 
-        playingPiece = nextPiece;
-        nextPiece = spawnTetromino(tft); 
+    
 
-        xCursor = playingPiece.x;
-        yCursor = playingPiece.y;   
-        drawTetromino(tft, board, playingPiece, xCursor, yCursor);
-        playingTetromino = true; 
-        clearNextWindow(tft); 
-        drawTetromino(tft, nextPiece, 170, 35);
-    }
+//spawns a new tetromino if one has been placed onto the board already 
+        if (playingTetromino == false) {
+            //only if the HOLD button hasnt already been placed before locking 
+            //the tetromino into the board 
+            playingPiece = nextPiece;
+            nextPiece = spawnTetromino(tft); 
+
+            xCursor = playingPiece.x;
+            yCursor = playingPiece.y;   
+            drawTetromino(tft, board, playingPiece, xCursor, yCursor);
+            playingTetromino = true; 
+            clearNextWindow(tft); 
+            drawTetromino(tft, nextPiece, 170, 35);
+            if ((wallCollision(playingPiece, xCursor, yCursor + 1) == HIGH) 
+                        || (blockCollision(playingPiece, board, xCursor, yCursor + 1) == HIGH)) {
+                    
+                gameStart = false; 
+                playingTetromino = false;  
+                loadGameOver(tft);
+                //waits for every button to be released
+                while ((digitalRead(HARD_DROP) == LOW) || (digitalRead(SOFT_DROP) == LOW) ||
+                    (digitalRead(LEFT) == LOW) ||(digitalRead(RIGHT) == LOW) ||
+                    (digitalRead(ROTATE) == LOW) || (digitalRead(HOLD) == LOW)) {
+                }
+                //waits for button input before restarting
+                while ((digitalRead(HARD_DROP) == HIGH) &&
+                    (digitalRead(SOFT_DROP) == HIGH) && (digitalRead(LEFT) == HIGH) &&
+                    (digitalRead(RIGHT) == HIGH) && (digitalRead(ROTATE) == HIGH) &&
+                    (digitalRead(HOLD) == HIGH)) {
+                }                
+                tft.fillScreen(BLACK);         
+            }
+
+        }
+        
+if (gameStart) {
     //left movement 
     if (buttonReady) {
         if (digitalRead(LEFT) == LOW) {
@@ -112,16 +159,6 @@ void loop() {
                 //sets new location of cursor 
                 xCursor = xCursor - 1;
                 buttonReleaseTime = millis();
-
-
-                //stops movement
-
-                //printBoard(board);
-                Serial.print("cursor is at (");
-                Serial.print(xCursor);
-                Serial.print(", ");
-                Serial.print(yCursor);
-                Serial.print(") \n");
 
             } else {
                 Serial.println("tetromino has hit a wall or block"); 
@@ -139,14 +176,9 @@ void loop() {
                 //move cursor one block right instead of left 
                 xCursor = xCursor + 1;
                 buttonReleaseTime = millis();
-                //printBoard(board);
-                Serial.print("cursor is at (");
-                Serial.print(xCursor);
-                Serial.print(", ");
-                Serial.print(yCursor);
-                Serial.print(") \n");
 
-  
+
+
             } else {
                 Serial.println("tetromino has hit a wall or block"); 
             }
@@ -155,8 +187,10 @@ void loop() {
 
         //rotating tetromino 
         } else if (digitalRead(ROTATE) == LOW) {
+            if ((wallCollision(playingPiece, xCursor, yCursor + 1) == LOW) 
+                        && (blockCollision(playingPiece, board, xCursor, yCursor + 1) == LOW)) {
 
-
+                
             buttonReady = false; 
             rotateTetromino(tft, playingPiece, board, xCursor, yCursor);
             buttonReleaseTime = millis();
@@ -168,16 +202,18 @@ void loop() {
             Serial.print(yCursor);
             Serial.print(") \n");
 
+            }
         
         //lock Tetromino and draw blocks onto board
         } else if (digitalRead(HARD_DROP) == LOW) {
 
-            
+            hardDropReleaseTime = millis();
             //prevents the hard_drop button from being pressed multiple times 
             buttonReady = false; 
             lockTetromino(tft, playingPiece, board, xCursor, yCursor);
             playingTetromino = false; 
             int rows = redrawBoard(tft, board); 
+            rowsCleared = rowsCleared + rows; 
             int distance = BOARD_HEIGHT - yCursor; 
             gameScore = gameScore + calculateScore(rows, distance, level); 
             updateGameScore(tft, gameScore);
@@ -216,6 +252,7 @@ void loop() {
                 buttonReady = false; 
                 playingTetromino = false; 
                 int rows = redrawBoard(tft, board); 
+                rowsCleared = rowsCleared + rows;
                 gameScore = gameScore + calculateScore(rows, 0, level);
                 updateGameScore(tft, gameScore);
                 canHold = true;
@@ -262,20 +299,25 @@ void loop() {
     //this slows down how many times a button can be activated when held down. 
     } else {
 
-        if ((millis() - buttonReleaseTime >= BUTTON_DELAY) || (millis() - buttonReleaseTime >= HARD_DROP_DELAY))  {
-
+        if ((millis() - buttonReleaseTime >= BUTTON_DELAY))  {
                 buttonReady = true;
 
-        }                   
+        }   
+        IF ((millis() - hardDropReleaseTime >= HARD_DROP_DELAY)) {
+
+            hardDropReleaseTime = 0;
+
+        }
+                        
 
     }
 
     //automatic gravity of tetromino 
     if ((digitalRead(SOFT_DROP) == HIGH) && (playingTetromino == true) 
-                && ((wallCollision(playingPiece, xCursor, yCursor + 1) == LOW) 
-                        || (blockCollision(playingPiece, board, xCursor, yCursor + 1) == LOW))) {
+                && (wallCollision(playingPiece, xCursor, yCursor + 1) == LOW) 
+                        && (blockCollision(playingPiece, board, xCursor, yCursor + 1) == LOW)) {
         //interval that moves the tetromino down 
-        if (millis() - moveDownTime >= MOVE_DOWN) {
+        if (millis() - moveDownTime >= gravity) {
             drawTetromino(tft, board, playingPiece, xCursor, yCursor + 1, xCursor, yCursor);
             yCursor = yCursor + 1;
             moveDownTime = millis();
@@ -293,7 +335,8 @@ void loop() {
         lockTetromino(tft, playingPiece, board, xCursor, yCursor);
 
         playingTetromino = false; 
-        int rows = redrawBoard(tft, board); 
+        int rows = redrawBoard(tft, board);
+        rowsCleared = rowsCleared + rows;  
         gameScore = gameScore + calculateScore(rows, 0, level);
         updateGameScore(tft, gameScore);
         //printBoard(board); 
@@ -302,7 +345,26 @@ void loop() {
         moveDownTime = millis(); 
 
     }
+
+    if ((rowsCleared >= 9) && (level != 10)) {
+        level++; 
+
+        gravity = levelSpeed[level + 1];
+        rowsCleared = 0; 
+        updateLevel(tft, level);
+        Serial.print("the level is now ");
+        Serial.print(level);
+        Serial.print("\n");
+    }
+        Serial.print("rowsCleared is");
+        Serial.print(rowsCleared);
+        Serial.print("\n");
+    }
+
 }
+
+    
+
 
 
 

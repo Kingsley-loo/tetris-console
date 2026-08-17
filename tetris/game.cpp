@@ -269,6 +269,7 @@ void LoadHomescreen(TFT_eSPI& tft) {
     tft.setTextSize(2);
     tft.setTextColor(TFT_WHITE);
     tft.fillScreen(TFT_BLACK);
+    tft.fillRect(4, 4, GAME_WINDOW_WIDTH -2, GAME_WINDOW_HEIGHT -2, BLACK);
     tft.drawRect(3, 3, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT, WHITE);
     tft.drawString("NEXT:", 165, 5);
     tft.drawRect(165, 25, NEXT_WINDOW_WIDTH, NEXT_WINDOW_HEIGHT, WHITE);
@@ -276,7 +277,6 @@ void LoadHomescreen(TFT_eSPI& tft) {
     tft.drawString("HOLD:", 165, 105);
     tft.drawRect(165, 125, NEXT_WINDOW_WIDTH, NEXT_WINDOW_HEIGHT, WHITE);
     tft.drawString("LEVEL:", 165, 219); 
-    tft.drawString("1", 165, 239);
     tft.drawString("SCORE:", 165, 274);
     updateGameScore(tft, 0); 
 
@@ -722,5 +722,22 @@ void updateGameScore(TFT_eSPI& tft, int gameScore) {
     string score = to_string(gameScore); 
     tft.fillRect(165, 294, 80, 20, BLACK);
     tft.drawString(score.c_str(), 165, 294); 
+    return;
 }
 
+void updateLevel(TFT_eSPI& tft, int newLevel) {
+    string level = to_string(newLevel); 
+    tft.fillRect(165, 239, 80, 20, BLACK);
+    tft.drawString(level.c_str(), 165, 239);
+    return;
+}
+
+void loadGameOver(TFT_eSPI& tft) {
+    tft.setTextColor(WHITE, BLACK); 
+    tft.setTextSize(3); 
+    tft.drawCentreString("GAME OVER", 80, 110, 1);
+    tft.setTextSize(1);
+    tft.drawCentreString("Press any button", 80, 165, 1);
+    tft.drawCentreString("to restart", 80, 180, 1);
+    return;
+}

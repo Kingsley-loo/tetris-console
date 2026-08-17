@@ -119,4 +119,8 @@ void loadStartMenu(TFT_eSPI& tft);
 int calculateScore (int rows, int distance, int level);
 
 void updateGameScore(TFT_eSPI& tft, int gameScore);
+
+void updateLevel(TFT_eSPI& tft, int level);
+
+void loadGameOver(TFT_eSPI& tft);
 #endif
