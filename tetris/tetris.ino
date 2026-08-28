@@ -124,12 +124,12 @@ void loop() {
             drawTetromino(tft, nextPiece, 170, 35);
 
             //stuff to check if the game should end (too many tetrominoes) 
-            if ((wallCollision(playingPiece, xCursor, yCursor + 1) == HIGH) 
-                        || (blockCollision(playingPiece, board, xCursor, yCursor + 1) == HIGH)) {
+            if (blockCollision(playingPiece, board, xCursor, yCursor + 1) == HIGH) {
                     
                 gameStart = false; 
                 playingTetromino = false;  
                 loadGameOver(tft);
+                delay(1000);
                 //waits for every button to be released
                 while ((digitalRead(HARD_DROP) == LOW) || (digitalRead(SOFT_DROP) == LOW) ||
                     (digitalRead(LEFT) == LOW) ||(digitalRead(RIGHT) == LOW) ||
@@ -332,9 +332,7 @@ void loop() {
             gravity = levelSpeed[level + 1];
             rowsCleared = 0; 
             updateLevel(tft, level);
-            Serial.print("the level is now ");
-            Serial.print(level);
-            Serial.print("\n");
+
         }  
 
     }
