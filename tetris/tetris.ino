@@ -121,7 +121,8 @@ void loop() {
             drawTetromino(tft, board, playingPiece, xCursor, yCursor);
             playingTetromino = true; 
             clearNextWindow(tft); 
-            drawTetromino(tft, nextPiece, 170, 35);
+            
+            drawNextTetromino(tft, nextPiece);
 
             //stuff to check if the game should end (too many tetrominoes) 
             if (blockCollision(playingPiece, board, xCursor, yCursor + 1) == HIGH) {
@@ -145,7 +146,8 @@ void loop() {
             }
 
         }
-        
+
+    //do these things only once the game has begun     
     if (gameStart) {
     //left movement 
         if (buttonReady) {
@@ -257,7 +259,7 @@ void loop() {
                     canHold = false;
                     playingTetromino = false; 
                     
-                    drawTetromino(tft, holdPiece, 170, 135);
+                    drawHoldTetromino(tft, holdPiece);
                     //printBoard(board);
                 //swaps the held and playing tetrominoes
                 } else if (canHold == true) {
@@ -270,7 +272,7 @@ void loop() {
                     canHold = false; 
 
                     clearHoldWindow(tft); 
-                    drawTetromino(tft, holdPiece, 170, 135);
+                    drawHoldTetromino(tft, holdPiece);
 
                     xCursor = playingPiece.x;
                     yCursor = playingPiece.y;   

@@ -403,7 +403,7 @@ void drawTetromino(TFT_eSPI& tft, Block (&board)[BOARD_WIDTH][BOARD_HEIGHT],
     
 }
 
-//for drawing tetrominoes in the "next" and "hold" boxes 
+//for drawing tetrominoes in any location 
 void drawTetromino(TFT_eSPI& tft, Tetromino& piece, int x, int y) {
     
 
@@ -725,6 +725,7 @@ void updateGameScore(TFT_eSPI& tft, int gameScore) {
     return;
 }
 
+//draws the level on display
 void updateLevel(TFT_eSPI& tft, int newLevel) {
     string level = to_string(newLevel); 
     tft.fillRect(165, 239, 80, 20, BLACK);
@@ -732,6 +733,7 @@ void updateLevel(TFT_eSPI& tft, int newLevel) {
     return;
 }
 
+//load the screen for when the game is over 
 void loadGameOver(TFT_eSPI& tft) {
     tft.setTextColor(WHITE, BLACK); 
     tft.setTextSize(3); 
@@ -740,4 +742,83 @@ void loadGameOver(TFT_eSPI& tft) {
     tft.drawCentreString("Press any button", 80, 165, 1);
     tft.drawCentreString("to restart", 80, 180, 1);
     return;
+}
+
+//for drawing tetrominoes in the "next" box
+void drawNextTetromino(TFT_eSPI& tft, Tetromino& piece) {
+    int length = 0;
+    int width = 0; 
+
+    //figure out the length and width of the tetromino on the display 
+    for (int i = 0; i < CELL_SIZE; i++) {
+       if (piece.shape[piece.orientation][i].x > width) {
+            width = piece.shape[piece.orientation][i].x;
+       } 
+       if (piece.shape[piece.orientation][i].y > length) {
+            length = piece.shape[piece.orientation][i].y;
+       }
+    }
+    Serial.println(width);
+    Serial.println(length);
+
+
+    length = (length + 1) * 15; 
+    width = (width + 1) * 15;
+
+    //get the x and y coordinates of where the tetromino should be 
+    //so it is centered in the window 
+    int x = ((70 - width)/2) + 165; 
+    int y = ((70 - length)/2) + 25; 
+    Serial.println(x);
+    Serial.println(y);
+
+    for (int i = 0; i < CELL_SIZE; i++) {
+        int xBlock = (piece.shape[piece.orientation][i].x * 15) + x;
+        int yBlock = (piece.shape[piece.orientation][i].y * 15) + y;
+        tft.drawRect(xBlock, yBlock, 15, 15, WHITE);
+        tft.fillRect(xBlock +1, yBlock + 1, 13, 13, piece.colour);
+
+    }
+
+    return;
+}
+
+void drawHoldTetromino(TFT_eSPI& tft, Tetromino& piece) {
+
+    int length = 0;
+    int width = 0; 
+
+    //figure out the length and width of the tetromino on the display 
+    for (int i = 0; i < CELL_SIZE; i++) {
+       if (piece.shape[piece.orientation][i].x > width) {
+            width = piece.shape[piece.orientation][i].x;
+       } 
+       if (piece.shape[piece.orientation][i].y > length) {
+            length = piece.shape[piece.orientation][i].y;
+       }
+    }
+    Serial.println(width);
+    Serial.println(length);
+
+
+    length = (length + 1) * 15; 
+    width = (width + 1) * 15;
+
+    //get the x and y coordinates of where the tetromino should be 
+    //so it is centered in the window 
+    int x = ((70 - width)/2) + 165; 
+    int y = ((70 - length)/2) + 125; 
+    Serial.println(x);
+    Serial.println(y);
+
+    for (int i = 0; i < CELL_SIZE; i++) {
+        int xBlock = (piece.shape[piece.orientation][i].x * 15) + x;
+        int yBlock = (piece.shape[piece.orientation][i].y * 15) + y;
+        tft.drawRect(xBlock, yBlock, 15, 15, WHITE);
+        tft.fillRect(xBlock +1, yBlock + 1, 13, 13, piece.colour);
+
+    }
+
+    return;
+    
 }

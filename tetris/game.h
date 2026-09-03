@@ -123,4 +123,8 @@ void updateGameScore(TFT_eSPI& tft, int gameScore);
 void updateLevel(TFT_eSPI& tft, int level);
 
 void loadGameOver(TFT_eSPI& tft);
+
+void drawNextTetromino(TFT_eSPI& tft, Tetromino& piece);
+
+void drawHoldTetromino(TFT_eSPI& tft, Tetromino& piece);
 #endif
